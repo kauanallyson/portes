@@ -1,0 +1,8 @@
+ALGORITMO main;
+VARIAVEIS
+  n1, n2, n3, n4, soma : INTEIRO;
+INICIO
+  LEIA(n1, n2, n3, n4);
+  soma <- n1 + n2 + n3 + n4;
+  ESCREVA(soma);
+FIM;
