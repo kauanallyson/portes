@@ -7,6 +7,45 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define PORTES_TOKEN_LIST              \
+    /* Keywords */                     \
+    X(PORTES_ALGORITMO, "ALGORITMO")   \
+    X(PORTES_VARIAVEIS, "VARIAVEIS")   \
+    X(PORTES_INICIO, "INICIO")         \
+    X(PORTES_FIM, "FIM")               \
+    X(PORTES_SE, "SE")                 \
+    X(PORTES_ENTAO, "ENTAO")           \
+    X(PORTES_SENAO, "SENAO")           \
+    X(PORTES_FIMSE, "FIMSE")           \
+    X(PORTES_INTEIRO, "INTEIRO")       \
+    X(PORTES_REAL, "REAL")             \
+    X(PORTES_STRING, "STRING")         \
+    X(PORTES_LOGICO, "LOGICO")         \
+    X(PORTES_VERDADEIRO, "VERDADEIRO") \
+    X(PORTES_FALSO, "FALSO")           \
+    X(PORTES_LEIA, "LEIA")             \
+    X(PORTES_ESCREVA, "ESCREVA")       \
+    /* Operators & Symbols */          \
+    X(PORTES_PLUS, "+")                \
+    X(PORTES_MINUS, "-")               \
+    X(PORTES_MULTIPLICATION, "*")      \
+    X(PORTES_DIVISION, "/")            \
+    X(PORTES_ASSIGN, "<-")             \
+    X(PORTES_SEMICOLON, ";")           \
+    X(PORTES_COLON, ":")               \
+    X(PORTES_COMMA, ",")               \
+    X(PORTES_L_PAREN, "(")             \
+    X(PORTES_R_PAREN, ")")             \
+    X(PORTES_L_THAN, "<")              \
+    X(PORTES_G_THAN, ">")              \
+    X(PORTES_LE_THAN, "<=")            \
+    X(PORTES_GE_THAN, ">=")            \
+    X(PORTES_DIFFERENT, "<>")          \
+    /* Literals / Specials */          \
+    X(PORTES_IDENTIFIER, "IDENTIFIER") \
+    X(PORTES_EOF, "EOF")               \
+    X(PORTES_UNKWOWN, "UNKNOWN")
+
 /* --- TYPES & STRUCTURES --- */
 
 typedef struct PortesString {
@@ -15,51 +54,9 @@ typedef struct PortesString {
     size_t amount;
 } PortesString;
 typedef enum PortesTokenKind {
-    PORTES_ALGORITMO,       // ALGORITMO
-    PORTES_VARIAVEIS,       // VARIAVEIS
-    PORTES_INICIO,          // INICIO
-    PORTES_FIM,             // FIM
-    PORTES_SE,              // SE
-    PORTES_ENTAO,           // ENTAO
-    PORTES_SENAO,           // SENAO
-    PORTES_FIMSE,           // FIMSE
-    PORTES_INTEIRO,         // INTEIRO
-    PORTES_REAL,            // REAL
-    PORTES_LOGICO,          // LOGICO
-    PORTES_VERDADEIRO,      // VERDADEIRO
-    PORTES_FALSO,           // FALSO
-    PORTES_CARACTERE,       // 'a-Z'
-    PORTES_STRING,          // "[a-Z]"
-    PORTES_IDENTIFIER,      // VARIABLE NAME
-    PORTES_LEIA,            // LEIA (VARIABLE NAME)
-    PORTES_ESCREVA,         // ESCREVA (STRING)
-    PORTES_NAO,             // NAO
-    PORTES_E,               // E
-    PORTES_OU,              // OU
-    PORTES_POT,             // POT (x,y)
-    PORTES_RAD,             // RAD (x)
-    PORTES_MOD,             // x MOD y
-    PORTES_DIV,             // x DIV y
-    PORTES_PLUS,            // +
-    PORTES_MINUS,           // -
-    PORTES_MULTIPLICATION,  // *
-    PORTES_DIVISION,        // /
-    PORTES_EQUALS,          // =
-    PORTES_L_THAN,          //
-    PORTES_G_THAN,          // >
-    PORTES_EL_THAN,         // <=
-    PORTES_EG_THAN,         // >=
-    PORTES_DIFFERENT,       // <>
-    PORTES_SEMICOLON,       // ;
-    PORTES_COLON,           // :
-    PORTES_COMMA,           // ,
-    PORTES_L_PAREN,         // (
-    PORTES_R_PAREN,         // )
-    PORTES_ASSIGN,          // <-
-    PORTES_S_QUOTE,         // '
-    PORTES_D_QUOTE,         // "
-    PORTES_EOF,             // EOF
-    PORTES_UNKWOWN          // UNRECOGNIZED TOKEN
+#define X(kind, name) kind,
+    PORTES_TOKEN_LIST
+#undef X
 } PortesTokenKind;
 
 typedef struct PortesToken {
@@ -190,60 +187,11 @@ void portes_close_file(FILE* f) {
 
 const char* portes_kind_to_cstr(PortesTokenKind kind) {
     switch (kind) {
-        case PORTES_ALGORITMO:
-            return "ALGORITMO";
-        case PORTES_VARIAVEIS:
-            return "VARIAVEIS";
-        case PORTES_INICIO:
-            return "INICIO";
-        case PORTES_FIM:
-            return "FIM";
-        case PORTES_SE:
-            return "SE";
-        case PORTES_ENTAO:
-            return "ENTAO";
-        case PORTES_SENAO:
-            return "SENAO";
-        case PORTES_FIMSE:
-            return "FIMSE";
-        case PORTES_INTEIRO:
-            return "INTEIRO";
-        case PORTES_REAL:
-            return "REAL";
-        case PORTES_LOGICO:
-            return "LOGICO";
-        case PORTES_VERDADEIRO:
-            return "VERDADEIRO";
-        case PORTES_FALSO:
-            return "FALSO";
-        case PORTES_IDENTIFIER:
-            return "IDENTIFIER";
-        case PORTES_LEIA:
-            return "LEIA";
-        case PORTES_ESCREVA:
-            return "ESCREVA";
-        case PORTES_PLUS:
-            return "PLUS";
-        case PORTES_MINUS:
-            return "MINUS";
-        case PORTES_MULTIPLICATION:
-            return "MULT";
-        case PORTES_DIVISION:
-            return "DIV";
-        case PORTES_ASSIGN:
-            return "ASSIGN";
-        case PORTES_SEMICOLON:
-            return "SEMICOLON";
-        case PORTES_COLON:
-            return "COLON";
-        case PORTES_COMMA:
-            return "COMMA";
-        case PORTES_L_PAREN:
-            return "L_PAREN";
-        case PORTES_R_PAREN:
-            return "R_PAREN";
-        case PORTES_EOF:
-            return "EOF";
+#define X(kind, name) \
+    case kind:        \
+        return name;
+        PORTES_TOKEN_LIST
+#undef X
         default:
             return "UNKNOWN";
     }
@@ -288,47 +236,29 @@ PortesToken portes_set_token_kind(PortesToken* token, PortesTokenKind kind,
 }
 
 PortesTokenKind portes_get_keyword_kind(PortesString str) {
-    static const struct {
-        const char* keyword;
-        size_t length;
-        PortesTokenKind kind;
-    } keywords[] = {
-        {"ALGORITMO", 9, PORTES_ALGORITMO},
-        {"VARIAVEIS", 9, PORTES_VARIAVEIS},
-        {"INICIO", 6, PORTES_INICIO},
-        {"FIM", 3, PORTES_FIM},
-        {"SE", 2, PORTES_SE},
-        {"ENTAO", 5, PORTES_ENTAO},
-        {"SENAO", 5, PORTES_SENAO},
-        {"FIMSE", 5, PORTES_FIMSE},
-        {"INTEIRO", 7, PORTES_INTEIRO},
-        {"REAL", 4, PORTES_REAL},
-        {"LOGICO", 6, PORTES_LOGICO},
-        {"VERDADEIRO", 10, PORTES_VERDADEIRO},
-        {"FALSO", 5, PORTES_FALSO},
-        {"LEIA", 4, PORTES_LEIA},
-        {"ESCREVA", 7, PORTES_ESCREVA},
-        {"NAO", 3, PORTES_NAO},
-        {"E", 1, PORTES_E},
-        {"OU", 2, PORTES_OU},
-        {"POT", 3, PORTES_POT},
-        {"RAD", 3, PORTES_RAD},
-        {"MOD", 3, PORTES_MOD},
-        {"DIV", 3, PORTES_DIV},
-    };
+#define X(kind, name)                             \
+    if (str.amount == strlen(name) &&             \
+        memcmp(str.items, name, str.amount) == 0) \
+        return kind;
 
-    for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i) {
-        if (str.amount == keywords[i].length &&
-            memcmp(str.items, keywords[i].keyword, str.amount) == 0) {
-            return keywords[i].kind;
-        }
-    }
+    X(PORTES_ALGORITMO, "ALGORITMO")
+    X(PORTES_VARIAVEIS, "VARIAVEIS")
+    X(PORTES_INICIO, "INICIO")
+    X(PORTES_FIM, "FIM")
+    X(PORTES_INTEIRO, "INTEIRO")
+    X(PORTES_REAL, "REAL")
+    X(PORTES_LEIA, "LEIA")
+    X(PORTES_ESCREVA, "ESCREVA")
+    X(PORTES_SE, "SE")
+    X(PORTES_ENTAO, "ENTAO")
+    X(PORTES_SENAO, "SENAO")
+    X(PORTES_FIMSE, "FIMSE")
+#undef X
 
     return PORTES_IDENTIFIER;
 }
 
 PortesTokens portes_generate_tokens(FILE* f, PortesTokens ptks) {
-    // Note: Don't zero out ptks if you want to append to an existing list
     int c;
     size_t line = 1;
     size_t column = 0;
@@ -399,14 +329,36 @@ PortesTokens portes_generate_tokens(FILE* f, PortesTokens ptks) {
                 } else if (next == '=') {
                     fgetc(f);
                     column++;
-                    token.kind = PORTES_EL_THAN;
+                    token.kind = PORTES_LE_THAN;
                     token.value = portes_string_from_cstr("<=");
                 } else {
                     token.kind = PORTES_L_THAN;
                     token.value = portes_string_from_cstr("<");
                 }
             } break;
+            case '"': {
+                PortesString str_val = {0};
+                // We don't include the opening quote in the value
+                while (portes_peek(f) != '"' && portes_peek(f) != EOF) {
+                    char next_c = (char)fgetc(f);
+                    column++;
+                    if (next_c == '\n') {
+                        line++;
+                        column = 0;
+                    }
+                    portes_string_append_char(&str_val, next_c);
+                }
 
+                if (fgetc(f) == '"') {  // Consume closing quote
+                    column++;
+                    token.kind = PORTES_STRING;
+                    token.value = str_val;
+                } else {
+                    // Handle unclosed string error
+                    token.kind = PORTES_UNKWOWN;
+                    token.value = str_val;
+                }
+            } break;
             default:
                 if (isalpha(c) || c == '_') {
                     PortesString word = {0};

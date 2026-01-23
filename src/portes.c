@@ -11,13 +11,15 @@ int main(int argc, const char** argv) {
     FILE* source = portes_open_file(sourcepath, "r");
     if (!source) {
         fprintf(stderr, "couldn't locate source code file\n");
+        portes_string_free(&sourcepath);
         exit(1);
     }
 
-    PortesString outputpath = portes_string_from_cstr("output.txt");
-    FILE* output = portes_open_file(outputpath, "w");
+    FILE* output = portes_open_file(portes_string_from_cstr("output.txt"), "w");
     if (!output) {
         fprintf(stderr, "couldn't create output file\n");
+        portes_close_file(source);
+        portes_string_free(&sourcepath);
         exit(1);
     }
 
@@ -28,16 +30,16 @@ int main(int argc, const char** argv) {
     fprintf(output, "--------------------------------------------------\n");
     for (size_t i = 0; i < tokens.amount; ++i) {
         PortesToken t = tokens.items[i];
-
         fprintf(output, "%-20.*s | %-15s | %zu:%zu\n", (int)t.value.amount,
                 t.value.items, portes_kind_to_cstr(t.kind), t.line, t.column);
     }
 
-    printf("File '%s' created and written successfully.\n", outputpath.items);
+    printf("File 'output.txt' created and written successfully.\n");
 
     portes_tokens_free(&tokens);
     portes_string_free(&sourcepath);
     portes_close_file(output);
     portes_close_file(source);
+
     return 0;
 }
