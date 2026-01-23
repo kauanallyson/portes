@@ -26,11 +26,11 @@ int main(int argc, const char** argv) {
     PortesTokens tokens = {0};
     tokens = portes_generate_tokens(source, tokens);
 
-    fprintf(output, "%-20s | %-15s | %s\n", "VALUE", "KIND", "LINE:COL");
+    fprintf(output, "%-15s | %-20s | %s\n", "VALUE", "KIND", "LINE:COL");
     fprintf(output, "--------------------------------------------------\n");
     for (size_t i = 0; i < tokens.amount; ++i) {
         PortesToken t = tokens.items[i];
-        fprintf(output, "%-20.*s | %-15s | %zu:%zu\n", (int)t.value.amount,
+        fprintf(output, "%-15.*s | %-20s | %zu:%zu\n", (int)t.value.amount,
                 t.value.items, portes_kind_to_cstr(t.kind), t.line, t.column);
     }
 

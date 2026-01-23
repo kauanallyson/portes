@@ -53,6 +53,7 @@ typedef struct PortesString {
     size_t capacity;
     size_t amount;
 } PortesString;
+
 typedef enum PortesTokenKind {
 #define X(kind, name) kind,
     PORTES_TOKEN_LIST
@@ -117,13 +118,20 @@ PortesTokens portes_generate_tokens(FILE* f, PortesTokens ptks);
 
 #ifdef PORTES_IMPLEMENTATION
 
+// PORTES STRING METHODS
+
 PortesString portes_string_from_cstr(const char* cstr) {
-    PortesString str = {0};
-    if (cstr == NULL) return str;
-    for (size_t i = 0; cstr[i] != '\0'; ++i) {
-        portes_string_append_char(&str, cstr[i]);
+    PortesString result = {0};
+    if (!cstr) return result;
+
+    size_t len = strlen(cstr);
+    result.items = malloc(len);
+    if (result.items) {
+        memcpy((void*)result.items, cstr, len);
+        result.amount = len;
+        result.capacity = len;
     }
-    return str;
+    return result;
 }
 
 void portes_tokens_free(PortesTokens* ptks) {
@@ -167,6 +175,8 @@ void portes_string_free(PortesString* str) {
     }
 }
 
+// FILE MANAGEMENT
+
 FILE* portes_open_file(PortesString filepath, const char* mode) {
     char* cstr = malloc(filepath.amount + 1);
     memcpy(cstr, filepath.items, filepath.amount);
@@ -183,18 +193,6 @@ FILE* portes_open_file(PortesString filepath, const char* mode) {
 
 void portes_close_file(FILE* f) {
     if (f) fclose(f);
-}
-
-const char* portes_kind_to_cstr(PortesTokenKind kind) {
-    switch (kind) {
-#define X(kind, name) \
-    case kind:        \
-        return name;
-        PORTES_TOKEN_LIST
-#undef X
-        default:
-            return "UNKNOWN";
-    }
 }
 
 void portes_print_file(FILE* f) {
@@ -223,9 +221,23 @@ int portes_file_size(PortesString filepath) {
     return res;
 }
 
+// LEXER
+
 int portes_peek(FILE* f) {
     const int c = getc(f);
     return c == EOF ? EOF : ungetc(c, f);
+}
+
+const char* portes_kind_to_cstr(PortesTokenKind kind) {
+    switch (kind) {
+#define X(kind, name) \
+    case kind:        \
+        return #kind;
+        PORTES_TOKEN_LIST
+#undef X
+        default:
+            return "UNKNOWN";
+    }
 }
 
 PortesToken portes_set_token_kind(PortesToken* token, PortesTokenKind kind,
