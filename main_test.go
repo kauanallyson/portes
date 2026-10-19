@@ -11,6 +11,18 @@ import (
 // run transpiles src, compiles the C with cc and runs it with the given stdin.
 func run(t *testing.T, src, stdin string) string {
 	t.Helper()
+	cmd := exec.Command(build(t, src))
+	cmd.Stdin = strings.NewReader(stdin)
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatalf("program failed: %v", err)
+	}
+	return string(out)
+}
+
+// build transpiles src and compiles the C with cc, returning the binary path.
+func build(t *testing.T, src string) string {
+	t.Helper()
 	cc, err := exec.LookPath("cc")
 	if err != nil {
 		t.Skip("cc not found")
@@ -27,13 +39,27 @@ func run(t *testing.T, src, stdin string) string {
 	if out, err := exec.Command(cc, "-Wall", "-Wextra", "-Werror", "-o", bin, cfile).CombinedOutput(); err != nil {
 		t.Fatalf("cc failed: %v\n%s\nC source:\n%s", err, out, csrc)
 	}
-	cmd := exec.Command(bin)
-	cmd.Stdin = strings.NewReader(stdin)
-	out, err := cmd.Output()
+	return bin
+}
+
+// TestExamplesCompile keeps every program in examples/ valid.
+func TestExamplesCompile(t *testing.T) {
+	files, err := filepath.Glob("examples/*.ptes")
 	if err != nil {
-		t.Fatalf("program failed: %v", err)
+		t.Fatal(err)
 	}
-	return string(out)
+	if len(files) == 0 {
+		t.Fatal("no examples found")
+	}
+	for _, f := range files {
+		t.Run(filepath.Base(f), func(t *testing.T) {
+			src, err := os.ReadFile(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+			build(t, string(src))
+		})
+	}
 }
 
 func TestEndToEnd(t *testing.T) {
