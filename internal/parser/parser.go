@@ -7,14 +7,6 @@ import (
 	"github.com/kauanallyson/portes/internal/token"
 )
 
-// Error is a syntax error at a given position of the source.
-type Error struct {
-	Pos token.Pos
-	Msg string
-}
-
-func (e *Error) Error() string { return fmt.Sprintf("%s: %s", e.Pos, e.Msg) }
-
 type Parser struct {
 	tokens []token.Token
 	pos    int
@@ -25,7 +17,7 @@ func Parse(tokens []token.Token) (prog *ast.Program, err error) {
 	p := &Parser{tokens: tokens}
 	defer func() {
 		if r := recover(); r != nil {
-			perr, ok := r.(*Error)
+			perr, ok := r.(*token.Error)
 			if !ok {
 				panic(r)
 			}
@@ -57,7 +49,17 @@ func (p *Parser) next() token.Token {
 }
 
 func (p *Parser) fail(pos token.Pos, format string, args ...any) {
-	panic(&Error{Pos: pos, Msg: fmt.Sprintf(format, args...)})
+	panic(&token.Error{Pos: pos, Msg: fmt.Sprintf(format, args...)})
+}
+
+// optional skips the current token if it is of the given kind,
+// reporting whether it did.
+func (p *Parser) optional(kind token.Kind) bool {
+	if p.at(kind) {
+		p.next()
+		return true
+	}
+	return false
 }
 
 func (p *Parser) expect(kind token.Kind) token.Token {
@@ -159,7 +161,7 @@ func (p *Parser) parseBlock(terminators ...token.Kind) []ast.Stmt {
 		if p.at(token.EOF) {
 			p.fail(p.cur().Pos, "fim do arquivo inesperado, esperado %s", describe(terminators[0]))
 		}
-		if p.at(token.FIM, token.FIMSE, token.SENAO) {
+		if token.IsBlockEnd(p.cur().Kind) {
 			p.fail(p.cur().Pos, "esperado %s, encontrado %s", describe(terminators[0]), found(p.cur()))
 		}
 		stmts = append(stmts, p.parseStmt())
@@ -177,6 +179,10 @@ func (p *Parser) parseStmt() ast.Stmt {
 		return p.parseWrite()
 	case token.SE:
 		return p.parseIf()
+	case token.ENQUANTO:
+		return p.parseWhile()
+	case token.PARA:
+		return p.parseFor()
 	}
 	p.fail(p.cur().Pos, "comando inválido: %s", found(p.cur()))
 	return nil
@@ -229,15 +235,69 @@ func (p *Parser) parseIf() *ast.IfStmt {
 		}
 	}
 	p.expect(token.FIMSE)
-	if p.at(token.SEMICOLON) {
-		p.next()
+	p.optional(token.SEMICOLON)
+	return stmt
+}
+
+func (p *Parser) parseWhile() *ast.WhileStmt {
+	start := p.expect(token.ENQUANTO)
+	stmt := &ast.WhileStmt{At: start.Pos}
+	stmt.Cond = p.parseExpr()
+	p.expect(token.FACA)
+	stmt.Body = p.parseBlock(token.FIMENQUANTO)
+	p.expect(token.FIMENQUANTO)
+	p.optional(token.SEMICOLON)
+	return stmt
+}
+
+func (p *Parser) parseFor() *ast.ForStmt {
+	start := p.expect(token.PARA)
+	stmt := &ast.ForStmt{At: start.Pos}
+	stmt.Var = p.parseIdent()
+	p.expect(token.DE)
+	stmt.From = p.parseExpr()
+	p.expect(token.ATE)
+	stmt.To = p.parseExpr()
+	if p.optional(token.PASSO) {
+		stmt.Step = p.parseExpr()
 	}
+	p.expect(token.FACA)
+	stmt.Body = p.parseBlock(token.FIMPARA)
+	p.expect(token.FIMPARA)
+	p.optional(token.SEMICOLON)
 	return stmt
 }
 
 /* --- EXPRESSIONS --- */
 
-func (p *Parser) parseExpr() ast.Expr {
+// parseLeftAssoc parses operand { op operand }, grouping to the left:
+// a - b - c is (a - b) - c.
+func (p *Parser) parseLeftAssoc(operand func() ast.Expr, ops ...token.Kind) ast.Expr {
+	left := operand()
+	for p.at(ops...) {
+		op := p.next()
+		right := operand()
+		left = &ast.BinaryExpr{At: op.Pos, Op: op.Kind, Left: left, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseExpr() ast.Expr { return p.parseLeftAssoc(p.parseAnd, token.OU) }
+
+func (p *Parser) parseAnd() ast.Expr { return p.parseLeftAssoc(p.parseNot, token.E) }
+
+// NAO binds looser than comparisons: NAO a = b is NAO (a = b).
+func (p *Parser) parseNot() ast.Expr {
+	if p.at(token.NAO) {
+		op := p.next()
+		return &ast.UnaryExpr{At: op.Pos, Op: op.Kind, X: p.parseNot()}
+	}
+	return p.parseComparison()
+}
+
+// parseComparison allows at most one comparison: a < b < c is an error,
+// so unlike parseLeftAssoc this is an if, not a loop.
+func (p *Parser) parseComparison() ast.Expr {
 	left := p.parseAdditive()
 	if p.at(token.EQUAL, token.DIFFERENT, token.L_THAN, token.G_THAN, token.LE_THAN, token.GE_THAN) {
 		op := p.next()
@@ -248,23 +308,11 @@ func (p *Parser) parseExpr() ast.Expr {
 }
 
 func (p *Parser) parseAdditive() ast.Expr {
-	left := p.parseTerm()
-	for p.at(token.PLUS, token.MINUS) {
-		op := p.next()
-		right := p.parseTerm()
-		left = &ast.BinaryExpr{At: op.Pos, Op: op.Kind, Left: left, Right: right}
-	}
-	return left
+	return p.parseLeftAssoc(p.parseTerm, token.PLUS, token.MINUS)
 }
 
 func (p *Parser) parseTerm() ast.Expr {
-	left := p.parseUnary()
-	for p.at(token.MULTIPLICATION, token.DIVISION) {
-		op := p.next()
-		right := p.parseUnary()
-		left = &ast.BinaryExpr{At: op.Pos, Op: op.Kind, Left: left, Right: right}
-	}
-	return left
+	return p.parseLeftAssoc(p.parseUnary, token.MULTIPLICATION, token.DIVISION, token.MOD)
 }
 
 func (p *Parser) parseUnary() ast.Expr {

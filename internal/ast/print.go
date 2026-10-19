@@ -56,6 +56,17 @@ func printStmt(w io.Writer, s Stmt, depth int) {
 			fmt.Fprintf(w, "%s  SENAO\n", indent)
 			printStmts(w, s.Else, depth+2)
 		}
+	case *WhileStmt:
+		fmt.Fprintf(w, "%sENQUANTO %s\n", indent, ExprString(s.Cond))
+		fmt.Fprintf(w, "%s  FACA\n", indent)
+		printStmts(w, s.Body, depth+2)
+	case *ForStmt:
+		fmt.Fprintf(w, "%sPARA %s DE %s ATE %s", indent, s.Var.Name, ExprString(s.From), ExprString(s.To))
+		if s.Step != nil {
+			fmt.Fprintf(w, " PASSO %s", ExprString(s.Step))
+		}
+		fmt.Fprintf(w, "\n%s  FACA\n", indent)
+		printStmts(w, s.Body, depth+2)
 	default:
 		fmt.Fprintf(w, "%s<stmt desconhecido %T>\n", indent, s)
 	}

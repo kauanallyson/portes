@@ -50,6 +50,18 @@ const (
 	FALSO
 	LEIA
 	ESCREVA
+	ENQUANTO
+	FACA
+	FIMENQUANTO
+	PARA
+	DE
+	ATE
+	PASSO
+	FIMPARA
+	E
+	OU
+	NAO
+	MOD
 	keywordEnd
 )
 
@@ -95,6 +107,19 @@ var names = [...]string{
 	FALSO:      "FALSO",
 	LEIA:       "LEIA",
 	ESCREVA:    "ESCREVA",
+
+	ENQUANTO:    "ENQUANTO",
+	FACA:        "FACA",
+	FIMENQUANTO: "FIMENQUANTO",
+	PARA:        "PARA",
+	DE:          "DE",
+	ATE:         "ATE",
+	PASSO:       "PASSO",
+	FIMPARA:     "FIMPARA",
+	E:           "E",
+	OU:          "OU",
+	NAO:         "NAO",
+	MOD:         "MOD",
 }
 
 func (k Kind) String() string {
@@ -124,6 +149,23 @@ type Pos struct {
 }
 
 func (p Pos) String() string { return fmt.Sprintf("%d:%d", p.Line, p.Column) }
+
+// IsBlockEnd reports whether k closes a block of statements.
+func IsBlockEnd(k Kind) bool {
+	switch k {
+	case FIM, FIMSE, SENAO, FIMENQUANTO, FIMPARA:
+		return true
+	}
+	return false
+}
+
+// Error is a syntax or semantic error at a given position of the source.
+type Error struct {
+	Pos Pos
+	Msg string
+}
+
+func (e *Error) Error() string { return fmt.Sprintf("%s: %s", e.Pos, e.Msg) }
 
 type Token struct {
 	Kind  Kind

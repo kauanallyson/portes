@@ -1,6 +1,10 @@
 package ast
 
-import "github.com/kauanallyson/portes/internal/token"
+import (
+	"strconv"
+
+	"github.com/kauanallyson/portes/internal/token"
+)
 
 type Node interface {
 	Pos() token.Pos
@@ -89,10 +93,29 @@ type IfStmt struct {
 	Else []Stmt
 }
 
+// ENQUANTO <Cond> FACA <Body> FIMENQUANTO
+type WhileStmt struct {
+	Base
+	Cond Expr
+	Body []Stmt
+}
+
+// PARA <Var> DE <From> ATE <To> [PASSO <Step>] FACA <Body> FIMPARA
+type ForStmt struct {
+	Base
+	Var  *Ident
+	From Expr
+	To   Expr
+	Step Expr // nil when there is no PASSO
+	Body []Stmt
+}
+
 func (*AssignStmt) stmtNode() {}
 func (*ReadStmt) stmtNode()   {}
 func (*WriteStmt) stmtNode()  {}
 func (*IfStmt) stmtNode()     {}
+func (*WhileStmt) stmtNode()  {}
+func (*ForStmt) stmtNode()    {}
 
 /* --- EXPRESSIONS --- */
 
@@ -121,14 +144,14 @@ type BoolLit struct {
 	Value bool
 }
 
-// -x
+// -x, NAO x
 type UnaryExpr struct {
 	Base
 	Op token.Kind
 	X  Expr
 }
 
-// a + b, a < b, ...
+// a + b, a < b, a E b, ...
 type BinaryExpr struct {
 	Base
 	Op    token.Kind
@@ -149,3 +172,20 @@ func (*BoolLit) exprNode()    {}
 func (*UnaryExpr) exprNode()  {}
 func (*BinaryExpr) exprNode() {}
 func (*ParenExpr) exprNode()  {}
+
+// ConstInt evaluates an integer literal, possibly negated: 2, -2, (-2).
+func ConstInt(e Expr) (int, bool) {
+	switch e := e.(type) {
+	case *IntLit:
+		n, err := strconv.Atoi(e.Value)
+		return n, err == nil
+	case *ParenExpr:
+		return ConstInt(e.X)
+	case *UnaryExpr:
+		if e.Op == token.MINUS {
+			n, ok := ConstInt(e.X)
+			return -n, ok
+		}
+	}
+	return 0, false
+}
