@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portes — Documentação</title>
+<meta name="description" content="Documentação do Portes, transpilador de Português Estruturado para C.">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" href="assets/p.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/p-180.png">
+<meta property="og:title" content="Portes — Português Estruturado para C">
+<meta property="og:description" content="Escreva algoritmos em português e veja o código C equivalente.">
+<meta property="og:image" content="assets/p-512.png">
+<style>
+:root {
+  --papel: #f8f9fc;
+  --papel-alt: #eef1f8;
+  --tinta: #000;
+  --tinta-suave: #3d3d3d;
+  --pauta: #dde2ef;
+  --caneta: #2b47c9;
+  --caneta-escura: #1f369e;
+  --margem: #d64545;
+  --lousa: #161c33;
+  --lousa-borda: #232b4a;
+  --giz: #e6e9f2;
+  --kw: #f2d479;
+  --tipo: #8fd0ff;
+  --str: #f4a6a0;
+  --num: #b5e08c;
+  --com: #7f88aa;
+  --inline-bg: #e8ecf8;
+  --sidebar: 260px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-variant-ligatures: none;
+}
+a { color: var(--caneta); text-underline-offset: 2px; }
+a:hover { color: var(--caneta-escura); }
+:focus-visible { outline: 2px solid var(--caneta); outline-offset: 2px; border-radius: 3px; }
+code, pre {
+  font-family: ui-monospace, "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: .9em;
+  /* sem ligaduras: <- e <> aparecem como se digita */
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+:not(pre) > code { background: var(--inline-bg); border: 1px solid var(--pauta); border-radius: 4px; padding: .05em .35em; }
+pre {
+  background: var(--lousa);
+  color: var(--giz);
+  border: 1px solid var(--lousa-borda);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  line-height: 1.5;
+  margin: 1rem 0;
+}
+pre .kw { color: var(--kw); font-weight: 600; }
+pre .tp { color: var(--tipo); font-weight: 600; }
+pre .st { color: var(--str); }
+pre .nu { color: var(--num); }
+pre .co { color: var(--com); font-style: italic; }
+
+/* layout */
+.layout { display: flex; min-height: 100vh; }
+nav.sidebar {
+  position: sticky; top: 0;
+  width: var(--sidebar); flex-shrink: 0;
+  height: 100vh; overflow-y: auto;
+  padding: 1.5rem 1.25rem;
+  background: var(--papel-alt);
+  border-right: 1px solid var(--pauta);
+}
+.marca { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--tinta); margin-bottom: 1.5rem; }
+.marca img { width: 36px; height: 36px; }
+.marca b { font-size: 1.25rem; }
+.marca small { color: var(--tinta-suave); font-weight: normal; }
+nav.sidebar ul { list-style: none; margin: 0; padding: 0; }
+nav.sidebar li a {
+  display: block; padding: .3rem .6rem; border-radius: 6px;
+  color: var(--tinta-suave); text-decoration: none; font-size: .95rem;
+}
+nav.sidebar li a:hover { background: var(--pauta); color: var(--tinta); }
+nav.sidebar li.sub a { padding-left: 1.4rem; font-size: .88rem; }
+nav.sidebar .grupo { margin: 1.2rem 0 .3rem .6rem; font-size: .85rem; color: var(--tinta); font-weight: 700; }
+
+main {
+  flex: 1; min-width: 0; max-width: 940px;
+  padding: 2.5rem clamp(16px, 5vw, 4rem) 4rem;
+}
+h1, h2, h3 { line-height: 1.25; }
+h2 { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--pauta); }
+h3 { margin-top: 2rem; }
+
+.hero { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.hero img { width: 112px; height: 112px; }
+.hero h1 { margin: 0; font-size: 2.4rem; }
+.hero p { margin: .25rem 0 0; color: var(--tinta-suave); font-size: 1.1rem; }
+.botoes { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1.5rem 0; }
+.botao {
+  display: inline-block; padding: .55rem 1.1rem; border-radius: 8px;
+  text-decoration: none; font-weight: 600; border: 1px solid var(--caneta);
+}
+.botao.primario { background: var(--caneta); color: var(--papel); }
+.botao.primario:hover { background: var(--caneta-escura); border-color: var(--caneta-escura); color: var(--papel); }
+.botao:not(.primario) { color: var(--caneta); }
+
+.lado-a-lado { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.lado-a-lado > div { min-width: 0; }
+.lado-a-lado .rotulo { font-size: .9rem; font-weight: 600; color: var(--tinta-suave); margin-bottom: -.6rem; }
+@media (max-width: 760px) { .lado-a-lado { grid-template-columns: 1fr; } }
+
+.tabela { overflow-x: auto; margin: 1rem 0; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+th, td { text-align: left; padding: .5rem .75rem; border-bottom: 1px solid var(--pauta); vertical-align: top; }
+th { background: var(--papel-alt); font-weight: 600; }
+
+.nota {
+  border-left: 4px solid var(--caneta);
+  background: var(--papel-alt);
+  padding: .75rem 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0;
+}
+.nota.atencao { border-left-color: var(--margem); }
+.nota p { margin: .3rem 0; }
+
+footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--pauta); color: var(--tinta-suave); font-size: .9rem; }
+
+/* menu mobile */
+.topo-mobile { display: none; }
+@media (max-width: 900px) {
+  .layout { display: block; }
+  .topo-mobile {
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+    padding: .6rem 16px; background: var(--papel-alt); border-bottom: 1px solid var(--pauta);
+  }
+  .topo-mobile .marca { margin: 0; }
+  .topo-mobile button {
+    background: none; border: 1px solid var(--pauta); border-radius: 6px;
+    color: var(--tinta); font-size: 1rem; padding: .3rem .7rem; cursor: pointer;
+  }
+  nav.sidebar {
+    display: none; position: fixed; top: 53px; left: 0; z-index: 9;
+    width: 100%; height: calc(100vh - 53px);
+  }
+  nav.sidebar.aberto { display: block; }
+  nav.sidebar > .marca { display: none; }
+  main { padding: 1.5rem 16px 3rem; }
+  .hero img { width: 80px; height: 80px; }
+  .hero h1 { font-size: 2rem; }
+  /* blocos de código ocupam a largura toda da tela */
+  pre { font-size: 13px; margin-left: -16px; margin-right: -16px; border-radius: 0; border-left: 0; border-right: 0; padding: .9rem 16px; }
+  /* cada linha da tabela vira um bloco, com o nome da coluna acima do valor */
+  .tabela thead { display: none; }
+  .tabela tr { display: block; padding: .6rem 0; border-bottom: 1px solid var(--pauta); }
+  .tabela td { display: block; border: 0; padding: .15rem 0; }
+  .tabela td[data-rotulo]::before {
+    content: attr(data-rotulo);
+    display: block; font-size: .8rem; font-weight: 600; color: var(--tinta-suave);
+  }
+  .tabela td:first-child { font-weight: 600; }
+  .tabela td:first-child::before { display: none; }
+  .tabela td:empty { display: none; }
+  html { scroll-padding-top: 4rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="topo-mobile">
+  <a class="marca" href="#"><img src="assets/p-64.png" alt=""><b>Portes</b></a>
+  <button type="button" id="menu" aria-expanded="false" aria-controls="nav">Menu</button>
+</header>
+
+<div class="layout">
+<nav class="sidebar" id="nav">
+  <a class="marca" href="#"><img src="assets/p-64.png" alt=""><span><b>Portes</b> <small>v0.1</small></span></a>
+  <ul>
+    <li><a href="#inicio">Início</a></li>
+    <li><a href="#instalacao">Instalação</a></li>
+    <li><a href="#uso">Usando o compilador</a></li>
+  </ul>
+  <div class="grupo">A linguagem</div>
+  <ul>
+    <li><a href="#estrutura">Estrutura do programa</a></li>
+    <li><a href="#lexico">Elementos léxicos</a></li>
+    <li><a href="#tipos">Tipos e variáveis</a></li>
+    <li><a href="#expressoes">Expressões</a></li>
+    <li><a href="#comandos">Comandos</a></li>
+    <li class="sub"><a href="#atribuicao">Atribuição</a></li>
+    <li class="sub"><a href="#leia">LEIA</a></li>
+    <li class="sub"><a href="#escreva">ESCREVA</a></li>
+    <li class="sub"><a href="#se">SE</a></li>
+    <li class="sub"><a href="#enquanto">ENQUANTO</a></li>
+    <li class="sub"><a href="#para">PARA</a></li>
+  </ul>
+  <div class="grupo">Referência</div>
+  <ul>
+    <li><a href="#traducao">Tradução para C</a></li>
+    <li><a href="#erros">Mensagens de erro</a></li>
+    <li><a href="#palavras">Palavras reservadas</a></li>
+    <li><a href="#exemplos">Exemplos</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<section id="inicio">
+  <div class="hero">
+    <img src="assets/p.svg" alt="Logo do Portes">
+    <div>
+      <h1>Portes</h1>
+      <p>Transpilador de Português Estruturado para C.</p>
+    </div>
+  </div>
+
+  <p>
+    O Portes lê algoritmos escritos em <strong>Português Estruturado</strong> (arquivos <code>.ptes</code>)
+    e gera o programa <strong>C</strong> equivalente. A ideia é ajudar quem está aprendendo lógica de
+    programação em português a dar o próximo passo: ver, lado a lado, como cada comando que já conhece
+    fica em C.
+  </p>
+
+  <div class="botoes">
+    <a class="botao primario" href="#instalacao">Começar</a>
+    <a class="botao" href="https://github.com/kauanallyson/portes">Código no GitHub</a>
+    <a class="botao" href="https://github.com/kauanallyson/portes/releases">Downloads</a>
+  </div>
+
+  <div class="lado-a-lado">
+    <div>
+      <p class="rotulo">Portes</p>
+<pre class="ptes">// Lê dois números inteiros e mostra a soma.
+ALGORITMO soma;
+VARIAVEIS
+  a, b, resultado : INTEIRO;
+INICIO
+  ESCREVA("Digite dois números:");
+  LEIA(a, b);
+  resultado &lt;- a + b;
+  ESCREVA(a, " + ", b, " = ", resultado);
+FIM;</pre>
+    </div>
+    <div>
+      <p class="rotulo">C gerado</p>
+<pre class="c">#include &lt;stdio.h&gt;
+
+/* ALGORITMO soma */
+int main(void) {
+    int a = 0, b = 0, resultado = 0;
+
+    printf("Digite dois números:\n");
+    scanf("%d", &amp;a);
+    scanf("%d", &amp;b);
+    resultado = a + b;
+    printf("%d + %d = %d\n", a, b, resultado);
+    return 0;
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section id="instalacao">
+  <h2>Instalação</h2>
+
+  <h3>Binário pronto</h3>
+  <p>
+    Baixe o executável para o seu sistema (Linux ou Windows, amd64 ou arm64) na página de
+    <a href="https://github.com/kauanallyson/portes/releases">releases</a>.
+    Para compilar o C gerado você também precisa de um compilador C, como <code>gcc</code> ou <code>clang</code>.
+  </p>
+
+  <h3>A partir do código-fonte</h3>
+  <p>Requer Go 1.27+ e um compilador C (<code>cc</code>).</p>
+<pre>git clone https://github.com/kauanallyson/portes.git
+cd portes
+go build .        # gera o executável ./portes</pre>
+</section>
+
+<section id="uso">
+  <h2>Usando o compilador</h2>
+<pre>./portes arquivo.ptes               # imprime o código C gerado
+./portes -o saida.c arquivo.ptes    # grava o C em saida.c
+cc -o prog saida.c &amp;&amp; ./prog        # compila e roda</pre>
+
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Opção</th><th>O que faz</th></tr></thead>
+    <tbody>
+      <tr><td><code>-o arquivo.c</code></td><td>Grava o código C no arquivo indicado em vez de imprimir na tela.</td></tr>
+      <tr><td><code>-tokens</code></td><td>Imprime a lista de tokens encontrados pelo analisador léxico.</td></tr>
+      <tr><td><code>-ast</code></td><td>Imprime a árvore sintática do programa.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    As opções <code>-tokens</code> e <code>-ast</code> são úteis para estudar como um compilador funciona
+    por dentro: dá para ver exatamente como o texto do programa é quebrado em pedaços e depois organizado
+    em uma árvore.
+  </p>
+</section>
+
+<section id="estrutura">
+  <h2>Estrutura do programa</h2>
+  <p>Todo programa Portes tem três partes: o nome, a declaração das variáveis e o corpo.</p>
+<pre class="ptes">ALGORITMO nome_do_programa;
+VARIAVEIS
+  // declarações
+INICIO
+  // comandos
+FIM;</pre>
+  <ul>
+    <li><code>ALGORITMO</code> dá um nome ao programa. O nome vira um comentário no C gerado.</li>
+    <li><code>VARIAVEIS</code> lista todas as variáveis que o programa usa, com seus tipos. Se o programa não usa variáveis, a seção pode ser omitida.</li>
+    <li>Entre <code>INICIO</code> e <code>FIM;</code> ficam os comandos, executados de cima para baixo.</li>
+  </ul>
+  <p>
+    Comandos simples (atribuição, <code>LEIA</code>, <code>ESCREVA</code>) terminam com <code>;</code>.
+    Nos fechamentos de bloco (<code>FIMSE</code>, <code>FIMENQUANTO</code>, <code>FIMPARA</code>) o
+    <code>;</code> é opcional.
+  </p>
+</section>
+
+<section id="lexico">
+  <h2>Elementos léxicos</h2>
+
+  <h3>Comentários</h3>
+  <p>Começam com <code>//</code> e vão até o fim da linha.</p>
+<pre class="ptes">// isto é um comentário
+x &lt;- 10;  // comentário no fim da linha</pre>
+
+  <h3>Identificadores</h3>
+  <p>
+    Nomes de variáveis e do algoritmo começam com uma letra ou <code>_</code>, seguidos de letras,
+    dígitos ou <code>_</code>. Apenas letras sem acento (<code>a–z</code>, <code>A–Z</code>) são aceitas
+    em nomes: use <code>media</code>, não <code>média</code>.
+  </p>
+
+  <h3>Maiúsculas e minúsculas</h3>
+  <p>
+    As palavras reservadas são escritas em <strong>MAIÚSCULAS</strong>: <code>SE</code> é palavra
+    reservada, mas <code>se</code> é um identificador comum. Nomes de variáveis também diferenciam
+    maiúsculas de minúsculas: <code>total</code> e <code>Total</code> são variáveis diferentes.
+  </p>
+
+  <h3>Literais</h3>
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Tipo</th><th>Exemplos</th><th>Observação</th></tr></thead>
+    <tbody>
+      <tr><td><code>INTEIRO</code></td><td><code>0</code>, <code>42</code>, <code>2026</code></td><td>Números negativos usam o operador <code>-</code>: <code>-5</code>.</td></tr>
+      <tr><td><code>REAL</code></td><td><code>3.14</code>, <code>0.5</code>, <code>2.0</code></td><td>Use ponto, não vírgula. É preciso ter dígitos dos dois lados: <code>.5</code> não vale.</td></tr>
+      <tr><td><code>STRING</code></td><td><code>"Olá, mundo!"</code></td><td>Entre aspas duplas, em uma única linha. Pode ter acentos.</td></tr>
+      <tr><td><code>LOGICO</code></td><td><code>VERDADEIRO</code>, <code>FALSO</code></td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="tipos">
+  <h2>Tipos e variáveis</h2>
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Tipo</th><th>Guarda</th><th>Em C</th></tr></thead>
+    <tbody>
+      <tr><td><code>INTEIRO</code></td><td>Números inteiros</td><td><code>int</code></td></tr>
+      <tr><td><code>REAL</code></td><td>Números com casas decimais</td><td><code>double</code></td></tr>
+      <tr><td><code>STRING</code></td><td>Texto (até 255 caracteres)</td><td><code>char nome[256]</code></td></tr>
+      <tr><td><code>LOGICO</code></td><td><code>VERDADEIRO</code> ou <code>FALSO</code></td><td><code>bool</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Declaração</h3>
+  <p>
+    Na seção <code>VARIAVEIS</code>, cada linha declara um ou mais nomes, separados por vírgula,
+    seguidos de <code>:</code>, do tipo e de <code>;</code>.
+  </p>
+<pre class="ptes">VARIAVEIS
+  nome : STRING;
+  n1, n2, n3, media : REAL;
+  contador : INTEIRO;
+  achou : LOGICO;</pre>
+  <p>
+    Toda variável começa com um valor “zerado”: <code>0</code> para números, <code>""</code> para
+    <code>STRING</code> e <code>FALSO</code> para <code>LOGICO</code>.
+  </p>
+
+  <h3>Regras de tipo</h3>
+  <ul>
+    <li>Toda variável usada precisa ter sido declarada, e só pode ser declarada uma vez.</li>
+    <li>Os tipos precisam bater. A única conversão automática é de <code>INTEIRO</code> para <code>REAL</code>:
+      dá para guardar <code>3</code> numa variável <code>REAL</code>, mas não <code>3.5</code> numa <code>INTEIRO</code>.</li>
+  </ul>
+</section>
+
+<section id="expressoes">
+  <h2>Expressões</h2>
+
+  <h3>Operadores</h3>
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Categoria</th><th>Operadores</th><th>Aplica-se a</th><th>Resultado</th></tr></thead>
+    <tbody>
+      <tr><td>Aritméticos</td><td><code>+</code> <code>-</code> <code>*</code> <code>/</code></td><td><code>INTEIRO</code>, <code>REAL</code></td><td><code>INTEIRO</code> se os dois forem inteiros, senão <code>REAL</code></td></tr>
+      <tr><td>Resto</td><td><code>MOD</code></td><td><code>INTEIRO</code></td><td><code>INTEIRO</code></td></tr>
+      <tr><td>Sinal</td><td><code>-</code> (unário)</td><td><code>INTEIRO</code>, <code>REAL</code></td><td>o mesmo tipo</td></tr>
+      <tr><td>Igualdade</td><td><code>=</code> <code>&lt;&gt;</code></td><td>dois números, duas <code>STRING</code>s ou dois <code>LOGICO</code>s</td><td><code>LOGICO</code></td></tr>
+      <tr><td>Ordem</td><td><code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td><td>dois números ou duas <code>STRING</code>s</td><td><code>LOGICO</code></td></tr>
+      <tr><td>Lógicos</td><td><code>E</code> <code>OU</code> <code>NAO</code></td><td><code>LOGICO</code></td><td><code>LOGICO</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Comparar <code>STRING</code>s com <code>&lt;</code> ou <code>&gt;</code> usa a ordem alfabética (como <code>strcmp</code> do C).</p>
+
+  <h3>Precedência</h3>
+  <p>Da mais forte (avaliada primeiro) para a mais fraca. Use parênteses para mudar a ordem.</p>
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Nível</th><th>Operadores</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>( )</code></td></tr>
+      <tr><td>2</td><td><code>-</code> unário</td></tr>
+      <tr><td>3</td><td><code>*</code> <code>/</code> <code>MOD</code></td></tr>
+      <tr><td>4</td><td><code>+</code> <code>-</code></td></tr>
+      <tr><td>5</td><td><code>=</code> <code>&lt;&gt;</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></td></tr>
+      <tr><td>6</td><td><code>NAO</code></td></tr>
+      <tr><td>7</td><td><code>E</code></td></tr>
+      <tr><td>8</td><td><code>OU</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="nota atencao">
+    <p><strong>Divisão inteira.</strong> Como em C, <code>INTEIRO / INTEIRO</code> descarta a parte decimal:
+      <code>7 / 2</code> dá <code>3</code>. Para obter <code>3.5</code>, faça um dos lados ser real: <code>7 / 2.0</code>.</p>
+  </div>
+  <div class="nota">
+    <p><strong><code>NAO</code> pega a comparação inteira.</strong> <code>NAO a = b</code> significa
+      <code>NAO (a = b)</code>, e não <code>(NAO a) = b</code>.</p>
+    <p><strong>Uma comparação por vez.</strong> <code>a &lt; b &lt; c</code> é erro; escreva
+      <code>a &lt; b E b &lt; c</code>.</p>
+  </div>
+
+<pre class="ptes">bissexto &lt;- (ano MOD 4 = 0 E ano MOD 100 &lt;&gt; 0) OU ano MOD 400 = 0;
+SE NAO bissexto ENTAO
+  ESCREVA(ano, " não é bissexto");
+FIMSE</pre>
+</section>
+
+<section id="comandos">
+  <h2>Comandos</h2>
+
+  <h3 id="atribuicao">Atribuição <code>&lt;-</code></h3>
+  <p>Guarda o valor de uma expressão numa variável. Lê-se “recebe”.</p>
+<pre class="ptes">soma &lt;- n1 + n2;
+media &lt;- soma / 2.0;
+nome &lt;- "Maria";
+acertou &lt;- FALSO;</pre>
+  <p>Em C, a atribuição de <code>STRING</code> vira <code>strcpy(nome, "Maria");</code>.</p>
+
+  <h3 id="leia">LEIA</h3>
+  <p>Lê valores digitados pelo usuário e guarda nas variáveis, na ordem.</p>
+<pre class="ptes">LEIA(idade);
+LEIA(n1, n2, n3);</pre>
+  <ul>
+    <li>Aceita variáveis <code>INTEIRO</code>, <code>REAL</code> e <code>STRING</code>. Não aceita <code>LOGICO</code>.</li>
+    <li>Em <code>STRING</code>, lê apenas <strong>uma palavra</strong> (para no primeiro espaço), até 255 caracteres.</li>
+    <li>Cada variável vira um <code>scanf</code> separado no C.</li>
+  </ul>
+
+  <h3 id="escreva">ESCREVA</h3>
+  <p>Mostra na tela os valores, um após o outro, e <strong>pula linha no fim</strong>.</p>
+<pre class="ptes">ESCREVA("Olá, mundo!");
+ESCREVA("Média de ", nome, ": ", media);</pre>
+  <ul>
+    <li>Aceita qualquer expressão, de qualquer tipo.</li>
+    <li>Valores <code>LOGICO</code> aparecem como <code>VERDADEIRO</code> ou <code>FALSO</code>.</li>
+    <li>Os valores não são separados por espaço automaticamente: inclua os espaços nas strings.</li>
+    <li>Todos os argumentos viram um único <code>printf</code> no C.</li>
+  </ul>
+
+  <h3 id="se">SE … ENTAO … SENAO … FIMSE</h3>
+  <p>Executa um bloco só se a condição (do tipo <code>LOGICO</code>) for verdadeira. O <code>SENAO</code> é opcional.</p>
+<pre class="ptes">SE m &gt;= 7 ENTAO
+  ESCREVA("Aprovado");
+SENAO
+  SE m &gt;= 4 ENTAO
+    ESCREVA("Recuperação");
+  SENAO
+    ESCREVA("Reprovado");
+  FIMSE
+FIMSE</pre>
+
+  <h3 id="enquanto">ENQUANTO … FACA … FIMENQUANTO</h3>
+  <p>Repete o bloco enquanto a condição for verdadeira. A condição é testada antes de cada repetição.</p>
+<pre class="ptes">a &lt;- 0;
+b &lt;- 1;
+ENQUANTO a &lt;= 100 FACA
+  ESCREVA(a);
+  prox &lt;- a + b;
+  a &lt;- b;
+  b &lt;- prox;
+FIMENQUANTO</pre>
+
+  <h3 id="para">PARA … DE … ATE … [PASSO …] FACA … FIMPARA</h3>
+  <p>Repete o bloco variando um contador do valor inicial até o final (inclusive).</p>
+<pre class="ptes">PARA i DE 1 ATE 10 FACA
+  ESCREVA("7 x ", i, " = ", 7 * i);
+FIMPARA
+
+PARA i DE 10 ATE 1 PASSO -1 FACA
+  ESCREVA(i, "...");
+FIMPARA</pre>
+  <ul>
+    <li>O contador precisa ser uma variável <code>INTEIRO</code>.</li>
+    <li>O <code>PASSO</code> é opcional (padrão <code>1</code>) e deve ser um <strong>número inteiro constante</strong>
+      diferente de zero, como <code>2</code> ou <code>-1</code>. Não pode ser uma variável.</li>
+    <li>Com passo positivo o laço continua enquanto <code>i &lt;= fim</code>; com passo negativo, enquanto <code>i &gt;= fim</code>.</li>
+  </ul>
+</section>
+
+<section id="traducao">
+  <h2>Tradução para C</h2>
+  <p>Resumo de como cada construção do Portes aparece no C gerado.</p>
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Portes</th><th>C</th></tr></thead>
+    <tbody>
+      <tr><td><code>ALGORITMO x; … INICIO … FIM;</code></td><td><code>int main(void) { … return 0; }</code></td></tr>
+      <tr><td><code>INTEIRO</code>, <code>REAL</code>, <code>LOGICO</code></td><td><code>int</code>, <code>double</code>, <code>bool</code> (<code>stdbool.h</code>)</td></tr>
+      <tr><td><code>STRING</code></td><td><code>char nome[256]</code>, com <code>strcpy</code> e <code>strcmp</code> (<code>string.h</code>)</td></tr>
+      <tr><td><code>x &lt;- expr;</code></td><td><code>x = expr;</code></td></tr>
+      <tr><td><code>LEIA(a, b);</code></td><td>um <code>scanf</code> por variável</td></tr>
+      <tr><td><code>ESCREVA(...);</code></td><td>um <code>printf</code> terminado em <code>\n</code></td></tr>
+      <tr><td><code>SE c ENTAO … SENAO … FIMSE</code></td><td><code>if (c) { … } else { … }</code></td></tr>
+      <tr><td><code>ENQUANTO c FACA … FIMENQUANTO</code></td><td><code>while (c) { … }</code></td></tr>
+      <tr><td><code>PARA i DE a ATE b PASSO n FACA</code></td><td><code>for (i = a; i &lt;= b; i += n)</code></td></tr>
+      <tr><td><code>E</code>, <code>OU</code>, <code>NAO</code></td><td><code>&amp;&amp;</code>, <code>||</code>, <code>!</code></td></tr>
+      <tr><td><code>MOD</code>, <code>=</code>, <code>&lt;&gt;</code></td><td><code>%</code>, <code>==</code>, <code>!=</code></td></tr>
+      <tr><td><code>VERDADEIRO</code>, <code>FALSO</code></td><td><code>true</code>, <code>false</code></td></tr>
+      <tr><td>variável com nome reservado no C (<code>int</code>, <code>printf</code>…)</td><td>ganha <code>_</code> no fim: <code>int_</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Os <code>#include</code> são adicionados só quando necessários.</p>
+</section>
+
+<section id="erros">
+  <h2>Mensagens de erro</h2>
+  <p>
+    Os erros apontam o arquivo, a linha e a coluna. Quando há erro de sintaxe, o compilador para no
+    primeiro; erros de tipo e de variáveis são todos listados de uma vez.
+  </p>
+<pre>main.ptes:6:3: variável 'total' não declarada
+main.ptes:7:3: não é possível atribuir STRING a 'n1' (INTEIRO)</pre>
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Mensagem</th><th>Causa comum</th></tr></thead>
+    <tbody>
+      <tr><td><code>variável 'x' não declarada</code></td><td>Esqueceu de declarar em <code>VARIAVEIS</code>, ou digitou o nome diferente (lembre que maiúsculas importam).</td></tr>
+      <tr><td><code>variável 'x' já declarada</code></td><td>O mesmo nome aparece duas vezes em <code>VARIAVEIS</code>.</td></tr>
+      <tr><td><code>não é possível atribuir REAL a 'x' (INTEIRO)</code></td><td>Tipos diferentes na atribuição.</td></tr>
+      <tr><td><code>LEIA não aceita a variável LOGICO 'x'</code></td><td>Não é possível ler um <code>LOGICO</code> do teclado.</td></tr>
+      <tr><td><code>variável do PARA deve ser INTEIRO</code></td><td>O contador do <code>PARA</code> foi declarado com outro tipo.</td></tr>
+      <tr><td><code>PASSO deve ser um número inteiro constante diferente de zero</code></td><td>Usou variável, real ou zero como passo.</td></tr>
+      <tr><td><code>condição do SE deve ser LOGICO, encontrado INTEIRO</code></td><td>A condição do <code>SE</code>/<code>ENQUANTO</code> não é uma comparação ou valor lógico.</td></tr>
+      <tr><td><code>operador 'MOD' não se aplica a REAL e INTEIRO</code></td><td>Operador usado com tipos que ele não aceita.</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="palavras">
+  <h2>Palavras reservadas</h2>
+  <p>Estas palavras não podem ser usadas como nomes de variáveis:</p>
+<pre class="ptes">ALGORITMO  VARIAVEIS  INICIO     FIM
+INTEIRO    REAL       STRING     LOGICO
+VERDADEIRO FALSO      LEIA       ESCREVA
+SE         ENTAO      SENAO      FIMSE
+ENQUANTO   FACA       FIMENQUANTO
+PARA       DE         ATE        PASSO      FIMPARA
+E          OU         NAO        MOD</pre>
+</section>
+
+<section id="exemplos">
+  <h2>Exemplos</h2>
+  <p>
+    A pasta <a href="https://github.com/kauanallyson/portes/tree/main/examples"><code>examples/</code></a>
+    tem 15 programas, do mais simples ao mais completo.
+  </p>
+  <div class="tabela">
+  <table>
+    <thead><tr><th>Exemplo</th><th>O que mostra</th></tr></thead>
+    <tbody id="lista-exemplos"></tbody>
+  </table>
+  </div>
+
+  <h3>Programa completo: senha</h3>
+<pre class="ptes">// Pede a senha até acertar ou acabarem as tentativas. Compara STRINGs com =.
+ALGORITMO senha;
+VARIAVEIS
+  tentativa : STRING;
+  restantes : INTEIRO;
+  acertou : LOGICO;
+INICIO
+  restantes &lt;- 3;
+  acertou &lt;- FALSO;
+  ENQUANTO NAO acertou E restantes &gt; 0 FACA
+    ESCREVA("Senha (", restantes, " tentativas):");
+    LEIA(tentativa);
+    SE tentativa = "portes123" ENTAO
+      acertou &lt;- VERDADEIRO;
+    SENAO
+      restantes &lt;- restantes - 1;
+    FIMSE
+  FIMENQUANTO
+  SE acertou ENTAO
+    ESCREVA("Acesso liberado");
+  SENAO
+    ESCREVA("Acesso bloqueado");
+  FIMSE
+FIM;</pre>
+</section>
+
+<footer>
+  Portes v0.1 · <a href="https://github.com/kauanallyson/portes">github.com/kauanallyson/portes</a>
+</footer>
+
+</main>
+</div>
+
+<script type="module">
+// Lista de exemplos
+const repo = "https://github.com/kauanallyson/portes/blob/main/examples/";
+const exemplos = [
+  ["01_ola_mundo", "o programa mais simples, sem variáveis"],
+  ["02_soma", "<code>LEIA</code>, aritmética e <code>ESCREVA</code>"],
+  ["03_media", "<code>REAL</code>, <code>STRING</code> e <code>SE</code>/<code>SENAO</code> aninhados"],
+  ["04_par_ou_impar", "<code>MOD</code> e variável <code>LOGICO</code>"],
+  ["05_maior_de_tres", "condições compostas com <code>E</code>"],
+  ["06_ano_bissexto", "<code>MOD</code> com <code>E</code>, <code>OU</code> e <code>NAO</code>"],
+  ["07_fatorial", "laço <code>PARA</code>"],
+  ["08_tabuada", "<code>PARA</code> com expressões no <code>ESCREVA</code>"],
+  ["09_contagem_regressiva", "<code>PARA</code> com <code>PASSO</code> negativo"],
+  ["10_fibonacci", "laço <code>ENQUANTO</code>"],
+  ["11_primo", "<code>ENQUANTO</code> com condição composta"],
+  ["12_senha", "comparação de <code>STRING</code>s"],
+  ["13_calculadora", "<code>LEIA</code> de vários tipos e <code>SE</code> em cadeia"],
+  ["14_imc", "cálculos e comparações com <code>REAL</code>"],
+  ["15_soma_ate_zero", "<code>ENQUANTO</code> controlado pela entrada do usuário"],
+];
+const tbody = document.getElementById("lista-exemplos");
+for (const [nome, descricao] of exemplos) {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td><a href="${repo}${nome}.ptes"><code>${nome}.ptes</code></a></td><td>${descricao}</td>`;
+  tbody.appendChild(tr);
+}
+
+// Realce de sintaxe
+const kw = "ALGORITMO|VARIAVEIS|INICIO|FIM|SE|ENTAO|SENAO|FIMSE|LEIA|ESCREVA|ENQUANTO|FACA|FIMENQUANTO|PARA|DE|ATE|PASSO|FIMPARA|E|OU|NAO|MOD|VERDADEIRO|FALSO";
+const tp = "INTEIRO|REAL|STRING|LOGICO";
+const regras = {
+  ptes: new RegExp(String.raw`(//[^\n]*)|("[^"\n]*")|\b(${tp})\b|\b(${kw})\b|\b(\d+(?:\.\d+)?)\b`, "g"),
+  c: new RegExp(String.raw`(/\*[\s\S]*?\*/|#include)|("(?:[^"\\\n]|\\.)*")|\b(int|double|char|bool|void)\b|\b(return|if|else|while|for)\b|\b(\d+(?:\.\d+)?)\b`, "g"),
+};
+const classes = [null, "co", "st", "tp", "kw", "nu"];
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const realcar = (pre, re) => {
+  const texto = pre.textContent;
+  let saida = "";
+  let ultimo = 0;
+  for (const m of texto.matchAll(re)) {
+    const i = classes.findIndex((c, j) => c && m[j] !== undefined);
+    saida += esc(texto.slice(ultimo, m.index));
+    saida += `<span class="${classes[i]}">${esc(m[0])}</span>`;
+    ultimo = m.index + m[0].length;
+  }
+  pre.innerHTML = saida + esc(texto.slice(ultimo));
+};
+// Rótulos das colunas para as tabelas empilhadas no celular
+for (const tabela of document.querySelectorAll(".tabela table")) {
+  const cabecalhos = [...tabela.querySelectorAll("thead th")].map((th) => th.textContent);
+  if (cabecalhos.length < 3) continue; // com duas colunas o rótulo só repete
+  for (const tr of tabela.querySelectorAll("tbody tr")) {
+    [...tr.children].forEach((td, i) => { td.dataset.rotulo = cabecalhos[i]; });
+  }
+}
+
+document.querySelectorAll("pre.ptes").forEach((p) => realcar(p, regras.ptes));
+document.querySelectorAll("pre.c").forEach((p) => realcar(p, regras.c));
+
+// Menu mobile
+const botao = document.getElementById("menu");
+const nav = document.getElementById("nav");
+const fecharMenu = () => {
+  nav.classList.remove("aberto");
+  botao.setAttribute("aria-expanded", "false");
+};
+botao.addEventListener("click", () => {
+  const aberto = nav.classList.toggle("aberto");
+  botao.setAttribute("aria-expanded", String(aberto));
+});
+nav.addEventListener("click", (ev) => {
+  if (ev.target.closest("a")) fecharMenu();
+});
+</script>
+</body>
+</html>
