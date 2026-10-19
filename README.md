@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/p-256.png" alt="Portes" width="256">
+</p>
+
 # Portes - v0.1
 
 Transpilador de Português Estruturado (Portes) para C.
