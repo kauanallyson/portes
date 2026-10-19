@@ -1,0 +1,11 @@
+// Mostra a tabuada de um número.
+ALGORITMO tabuada;
+VARIAVEIS
+  n, i : INTEIRO;
+INICIO
+  ESCREVA("Tabuada de qual número?");
+  LEIA(n);
+  PARA i DE 1 ATE 10 FACA
+    ESCREVA(n, " x ", i, " = ", n * i);
+  FIMPARA
+FIM;

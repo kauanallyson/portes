@@ -1,0 +1,15 @@
+// Usa MOD (resto da divisão) para saber se um número é par.
+ALGORITMO par_ou_impar;
+VARIAVEIS
+  n : INTEIRO;
+  par : LOGICO;
+INICIO
+  ESCREVA("Digite um número:");
+  LEIA(n);
+  par <- n MOD 2 = 0;
+  SE par ENTAO
+    ESCREVA(n, " é par");
+  SENAO
+    ESCREVA(n, " é ímpar");
+  FIMSE
+FIM;

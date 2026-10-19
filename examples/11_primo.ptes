@@ -1,0 +1,22 @@
+// Testa se um número é primo procurando um divisor entre 2 e n - 1.
+ALGORITMO primo;
+VARIAVEIS
+  n, d : INTEIRO;
+  achou_divisor : LOGICO;
+INICIO
+  ESCREVA("Digite um número:");
+  LEIA(n);
+  achou_divisor <- FALSO;
+  d <- 2;
+  ENQUANTO NAO achou_divisor E d < n FACA
+    SE n MOD d = 0 ENTAO
+      achou_divisor <- VERDADEIRO;
+    FIMSE
+    d <- d + 1;
+  FIMENQUANTO
+  SE n > 1 E NAO achou_divisor ENTAO
+    ESCREVA(n, " é primo");
+  SENAO
+    ESCREVA(n, " não é primo");
+  FIMSE
+FIM;

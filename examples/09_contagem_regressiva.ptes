@@ -1,0 +1,15 @@
+// PARA com PASSO negativo conta para trás.
+ALGORITMO contagem_regressiva;
+VARIAVEIS
+  i : INTEIRO;
+INICIO
+  PARA i DE 10 ATE 1 PASSO -1 FACA
+    ESCREVA(i, "...");
+  FIMPARA
+  ESCREVA("Fogo!");
+
+  // Só os pares, de 2 em 2.
+  PARA i DE 20 ATE 0 PASSO -2 FACA
+    ESCREVA(i);
+  FIMPARA
+FIM;

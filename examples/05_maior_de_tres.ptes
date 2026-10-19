@@ -1,0 +1,18 @@
+// Descobre o maior de três números usando E.
+ALGORITMO maior_de_tres;
+VARIAVEIS
+  a, b, c, maior : INTEIRO;
+INICIO
+  ESCREVA("Digite três números:");
+  LEIA(a, b, c);
+  SE a >= b E a >= c ENTAO
+    maior <- a;
+  SENAO
+    SE b >= c ENTAO
+      maior <- b;
+    SENAO
+      maior <- c;
+    FIMSE
+  FIMSE
+  ESCREVA("O maior é ", maior);
+FIM;

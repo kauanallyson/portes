@@ -1,0 +1,16 @@
+// Mostra os termos de Fibonacci menores que um limite, com ENQUANTO.
+ALGORITMO fibonacci;
+VARIAVEIS
+  limite, a, b, prox : INTEIRO;
+INICIO
+  ESCREVA("Limite:");
+  LEIA(limite);
+  a <- 0;
+  b <- 1;
+  ENQUANTO a < limite FACA
+    ESCREVA(a);
+    prox <- a + b;
+    a <- b;
+    b <- prox;
+  FIMENQUANTO
+FIM;

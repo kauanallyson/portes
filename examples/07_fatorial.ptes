@@ -1,0 +1,13 @@
+// Calcula n! com um laço PARA.
+ALGORITMO fatorial;
+VARIAVEIS
+  n, i, fat : INTEIRO;
+INICIO
+  ESCREVA("Digite n:");
+  LEIA(n);
+  fat <- 1;
+  PARA i DE 2 ATE n FACA
+    fat <- fat * i;
+  FIMPARA
+  ESCREVA(n, "! = ", fat);
+FIM;

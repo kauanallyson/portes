@@ -1,0 +1,19 @@
+// Soma números até o usuário digitar 0 e mostra a soma e a média.
+ALGORITMO soma_ate_zero;
+VARIAVEIS
+  n, soma, qtd : INTEIRO;
+INICIO
+  soma <- 0;
+  qtd <- 0;
+  ESCREVA("Digite números (0 para parar):");
+  LEIA(n);
+  ENQUANTO n <> 0 FACA
+    soma <- soma + n;
+    qtd <- qtd + 1;
+    LEIA(n);
+  FIMENQUANTO
+  ESCREVA("Soma: ", soma);
+  SE qtd > 0 ENTAO
+    ESCREVA("Média: ", soma / (qtd * 1.0));
+  FIMSE
+FIM;

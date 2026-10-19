@@ -1,0 +1,11 @@
+// Um ano é bissexto se é divisível por 4 e não por 100, ou se é divisível por 400.
+ALGORITMO ano_bissexto;
+VARIAVEIS
+  ano : INTEIRO;
+  bissexto : LOGICO;
+INICIO
+  ESCREVA("Digite o ano:");
+  LEIA(ano);
+  bissexto <- ano MOD 4 = 0 E NAO ano MOD 100 = 0 OU ano MOD 400 = 0;
+  ESCREVA(ano, " é bissexto? ", bissexto);
+FIM;

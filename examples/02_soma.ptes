@@ -1,0 +1,10 @@
+// Lê dois números inteiros e mostra a soma.
+ALGORITMO soma;
+VARIAVEIS
+  a, b, resultado : INTEIRO;
+INICIO
+  ESCREVA("Digite dois números:");
+  LEIA(a, b);
+  resultado <- a + b;
+  ESCREVA(a, " + ", b, " = ", resultado);
+FIM;

@@ -1,0 +1,22 @@
+// Calcula a média de três notas e diz a situação do aluno.
+ALGORITMO media;
+VARIAVEIS
+  nome : STRING;
+  n1, n2, n3, m : REAL;
+INICIO
+  ESCREVA("Nome do aluno:");
+  LEIA(nome);
+  ESCREVA("Três notas:");
+  LEIA(n1, n2, n3);
+  m <- (n1 + n2 + n3) / 3;
+  ESCREVA("Média de ", nome, ": ", m);
+  SE m >= 7 ENTAO
+    ESCREVA("Aprovado");
+  SENAO
+    SE m >= 4 ENTAO
+      ESCREVA("Recuperação");
+    SENAO
+      ESCREVA("Reprovado");
+    FIMSE
+  FIMSE
+FIM;

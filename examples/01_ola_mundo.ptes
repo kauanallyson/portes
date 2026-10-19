@@ -1,0 +1,5 @@
+// O programa mais simples: só escreve na tela.
+ALGORITMO ola_mundo;
+INICIO
+  ESCREVA("Olá, mundo!");
+FIM;

@@ -1,0 +1,26 @@
+// Calculadora simples: lê "número operador número", ex.: 3 * 4
+ALGORITMO calculadora;
+VARIAVEIS
+  a, b : REAL;
+  op : STRING;
+INICIO
+  ESCREVA("Conta (ex.: 3 * 4):");
+  LEIA(a, op, b);
+  SE op = "+" ENTAO
+    ESCREVA(a + b);
+  SENAO
+    SE op = "-" ENTAO
+      ESCREVA(a - b);
+    SENAO
+      SE op = "*" ENTAO
+        ESCREVA(a * b);
+      SENAO
+        SE op = "/" E b <> 0 ENTAO
+          ESCREVA(a / b);
+        SENAO
+          ESCREVA("Operação inválida");
+        FIMSE
+      FIMSE
+    FIMSE
+  FIMSE
+FIM;

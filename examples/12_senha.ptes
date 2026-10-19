@@ -1,0 +1,24 @@
+// Pede a senha até acertar ou acabarem as tentativas. Compara STRINGs com =.
+ALGORITMO senha;
+VARIAVEIS
+  tentativa : STRING;
+  restantes : INTEIRO;
+  acertou : LOGICO;
+INICIO
+  restantes <- 3;
+  acertou <- FALSO;
+  ENQUANTO NAO acertou E restantes > 0 FACA
+    ESCREVA("Senha (", restantes, " tentativas):");
+    LEIA(tentativa);
+    SE tentativa = "portes123" ENTAO
+      acertou <- VERDADEIRO;
+    SENAO
+      restantes <- restantes - 1;
+    FIMSE
+  FIMENQUANTO
+  SE acertou ENTAO
+    ESCREVA("Acesso liberado");
+  SENAO
+    ESCREVA("Acesso bloqueado");
+  FIMSE
+FIM;
